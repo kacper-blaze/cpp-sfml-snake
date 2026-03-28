@@ -5,6 +5,10 @@ Snake::Snake() {
     direction = Direction::Right;
 }
 
+Direction Snake::getDirection() const {
+    return direction;
+}
+
 void Snake::move() {
     sf::Vector2i head = body.front();
 

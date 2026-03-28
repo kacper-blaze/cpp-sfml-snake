@@ -13,6 +13,8 @@ add_executable(snakeGame
         src/Food.cpp
         src/Board.cpp
         src/Renderer.cpp
+        include/AI.h
+        src/AI.cpp
 )
         find_package(SFML 2.5 COMPONENTS graphics network audio system REQUIRED)
         target_link_libraries(snakeGame sfml-graphics sfml-network sfml-audio sfml-system)

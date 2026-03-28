@@ -13,6 +13,7 @@ public:
     void grow();
     void setDirection(Direction dir);
     bool checkSelfCollision() const;
+    Direction getDirection() const;
 
     bool occupies(const sf::Vector2i& pos) const;
 

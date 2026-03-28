@@ -19,6 +19,14 @@ private:
     void processEvents();
     void update();
     void render();
+    void updateSpectate();
+
+    void startSpectate();
+
+    Direction getAIDirection();
+
+    sf::Clock aiClock;
+    float aiMoveDelay = 0.1f;
 
     sf::RenderWindow window;
     Board board;
@@ -40,6 +48,7 @@ private:
     sf::Text startText;
     sf::Text gameOverText;
     sf::Text restartText;
+    sf::Text spectateText;
 
     void startGame();
     void restartGame();

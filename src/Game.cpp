@@ -2,12 +2,15 @@
 #include "Board.hpp"
 #include "Snake.hpp"
 #include "Food.hpp"
+#include "AI.h"
+#include <ctime>
 
 Game::Game()
     : window(sf::VideoMode(600, 600), "Snake"),
       board(20, 20),
       renderer(30)
 {
+    std::srand(std::time(nullptr));
     food.respawn(getFreeTiles());
 
     if (!font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")) {
@@ -21,7 +24,7 @@ Game::Game()
     centerText(titleText, 150);
 
     startText.setFont(font);
-    startText.setString("Press SPACE to Start");
+    startText.setString("Press SPACE to Play, S to Spectate");
     startText.setCharacterSize(24);
     startText.setFillColor(sf::Color::White);
     centerText(startText, 250);
@@ -33,10 +36,16 @@ Game::Game()
     centerText(gameOverText, 150);
 
     restartText.setFont(font);
-    restartText.setString("Press SPACE to Restart");
+    restartText.setString("Press SPACE to Play Again");
     restartText.setCharacterSize(24);
     restartText.setFillColor(sf::Color::White);
     centerText(restartText, 250);
+
+    spectateText.setFont(font);
+    spectateText.setString("Press S to Spectate");
+    spectateText.setCharacterSize(24);
+    spectateText.setFillColor(sf::Color::Cyan);
+    centerText(spectateText, 290);
 }
 
 void Game::centerText(sf::Text& text, float yPosition) {
@@ -50,6 +59,8 @@ void Game::run() {
 
         if (currentState == GameState::Playing) {
             update();
+        } else if (currentState == GameState::Spectate) {
+            updateSpectate();
         }
 
         render();
@@ -68,6 +79,13 @@ void Game::processEvents() {
                     startGame();
                 } else if (currentState == GameState::GameOver) {
                     restartGame();
+                }
+            }
+            if (event.key.code == sf::Keyboard::S) {
+                if (currentState == GameState::Menu) {
+                    startSpectate();
+                } else if (currentState == GameState::GameOver) {
+                    startSpectate();
                 }
             }
 
@@ -136,12 +154,53 @@ void Game::update() {
     }
 }
 
+void Game::updateSpectate() {
+    if (isGameOver) return;
+
+    if (aiClock.getElapsedTime().asSeconds() >= aiMoveDelay) {
+        Direction aiDirection = PathFinder::getNextDirection(
+    snake.getHead(), snake.getBody(), food.getPosition(),
+    board.getWidth(), board.getHeight(), snake.getDirection()
+);
+
+
+        snake.setDirection(aiDirection);
+        snake.move();
+        aiClock.restart();
+
+        if (!board.isInside(snake.getHead()) || snake.checkSelfCollision()) {
+            gameOver();
+            return;
+        }
+
+        if (snake.getHead() == food.getPosition()) {
+            snake.grow();
+            auto freeTiles = getFreeTiles();
+            if (!freeTiles.empty()) {
+                food.respawn(freeTiles);
+            } else {
+                hasWon = true;
+                gameOver();
+            }
+        }
+    }
+}
+
+void Game::startSpectate() {
+    snake = Snake();
+    food.respawn(getFreeTiles());
+    isGameOver = false;
+    hasWon = false;
+    currentState = GameState::Spectate;
+    aiClock.restart();
+}
+
 void Game::render() {
     window.clear();
 
     if (currentState == GameState::Menu) {
         renderMenu();
-    } else if (currentState == GameState::Playing) {
+    } else if (currentState == GameState::Playing || currentState == GameState::Spectate) {
         renderer.render(window, snake, food);
     } else if (currentState == GameState::GameOver) {
         renderer.render(window, snake, food);
@@ -150,6 +209,7 @@ void Game::render() {
 
     window.display();
 }
+
 void Game::gameOver() {
     isGameOver = true;
     currentState = GameState::GameOver;
@@ -185,4 +245,5 @@ void Game::renderGameOver() {
     }
     window.draw(gameOverText);
     window.draw(restartText);
+    window.draw(spectateText);
 }
