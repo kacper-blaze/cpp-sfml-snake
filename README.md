@@ -76,6 +76,7 @@ snakeGame/
 │   ├── Board.hpp
 │   ├── Renderer.hpp
 │   ├── Direction.hpp
+|   ├── AI.hpp
 │   └── GameState.hpp
 ├── src/               # Source files
 │   ├── main.cpp
@@ -83,6 +84,7 @@ snakeGame/
 │   ├── Snake.cpp
 │   ├── Food.cpp
 │   ├── Board.cpp
+│   ├── AI.cpp
 │   └── Renderer.cpp
 ├── CMakeLists.txt     # Build configuration
 └── README.md          # This file
